@@ -1,0 +1,45 @@
+#cloud-config
+autoinstall:
+  version: 1
+
+  early-commands:
+    - systemctl stop ssh # otherwise packer tries to connect and exceed max attempts
+
+  network:
+    network:
+      version: 2
+      ethernets:
+        eth0:
+          dhcp4: yes
+          dhcp-identifier: mac
+
+  apt:
+    preserve_sources_list: false
+    primary:
+      - arches: [amd64]
+        uri: "http://repo/artifactory/ubuntu"
+
+  ssh:
+    install-server: yes
+
+  identity:
+    hostname: ubuntu-server
+    password: "$6$BR9D1dkQPpBrlCUs$BxSJM4lq5nTd81IZD88sS6e43GcToHG6zAZrP8JE6FGWLVRLt/hoSQ3VjWG.LIBZu2oZc3eqNpEvHEyc4Bbfj0"
+    username: builder # root doesn't work
+
+  storage:
+    layout:
+      name: lvm
+
+  packages:
+    - git
+    - ansible
+    - open-vm-tools
+
+  user-data:
+    disable_root: false 
+
+  late-commands:
+    - echo 'builder ALL=(ALL) NOPASSWD:ALL' > /target/etc/sudoers.d/builder
+    - sed -ie 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="net.ifnames=0 ipv6.disable=1 biosdevname=0"/' /target/etc/default/grub
+    - curtin in-target --target /target update-grub2

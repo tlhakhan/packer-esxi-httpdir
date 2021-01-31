@@ -1,0 +1,14 @@
+{
+  "files": [
+    {
+      "pattern": "./*/",
+      "target": "packer-httpdir/",
+      "exclusions": [
+        ".git/",
+        ".gitignore"
+      ],
+      "recursive": "true",
+      "flat": "false"
+    }
+  ]
+}
